@@ -1,97 +1,33 @@
-#include <SDL2/SDL.h>
+#include "Game.h"
 
-class Game {
-public:
-    bool init() {
-        if (SDL_Init(SDL_INIT_VIDEO) != 0)
-            return false;
+#include <format>
 
-        window = SDL_CreateWindow(
-            "Moje hra",
-            SDL_WINDOWPOS_CENTERED,
-            SDL_WINDOWPOS_CENTERED,
-            800, 600,
-            SDL_WINDOW_SHOWN
-        );
+#include "Circle.h"
+#include "Vec2.h"
 
-        if (!window)
-            return false;
+Game::Game(City& central_city, std::vector<City>& other_cities)
+    : central_city(std::move(central_city)),
+      other_cities(std::move(other_cities)) {
 
-        renderer = SDL_CreateRenderer(
-            window,
-            -1,
-            SDL_RENDERER_ACCELERATED
-        );
-
-        return renderer != nullptr;
-    }
-
-    void run() {
-        bool running = true;
-        SDL_Event event;
-
-        while (running) {
-            while (SDL_PollEvent(&event)) {
-                if (event.type == SDL_QUIT)
-                    running = false;
-            }
-
-            update();
-            render();
-        }
-    }
-
-    void cleanup() {
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-    }
-
-private:
-    SDL_Window* window = nullptr;
-    SDL_Renderer* renderer = nullptr;
-
-    void update() {
-        // herní logika
-    }
-
-    void renderArrow() {
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-
-        // tělo šipky
-        SDL_RenderDrawLine(
-            renderer,
-            300, 300,
-            500, 300
-        );
-
-        // horní část hrotu
-        SDL_RenderDrawLine(
-            renderer,
-            500, 300,
-            470, 280
-        );
-
-        // spodní část hrotu
-        SDL_RenderDrawLine(
-            renderer,
-            500, 300,
-            470, 320
+    for (const auto& city : this->other_cities) {
+        angles.push_back(
+            Vec2::bearing(central_city.coords, city.coords)
         );
     }
+}
 
-    void render() {
-        // pozadí
-        SDL_SetRenderDrawColor(
-            renderer,
-            20, 20, 30, 255
-        );
+void Game::Start() const {
+    Circle c;
 
-        SDL_RenderClear(renderer);
+    for (size_t i = 0; i < other_cities.size(); ++i) {
+        const double angle = angles[i];
+        const City& city = other_cities[i];
 
-        // šipka
-        renderArrow();
+        const std::string city_name =
+            std::format("{} ({})", city.name, city.country_name);
 
-        SDL_RenderPresent(renderer);
+        c.add(angle, city_name);
     }
-};
+
+    c.draw();
+}
