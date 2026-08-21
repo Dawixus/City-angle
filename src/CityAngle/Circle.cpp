@@ -4,8 +4,7 @@
 #include <cmath>
 #include <iostream>
 
-Circle::Circle(int radius)
-    : radius(radius) {
+Circle::Circle(int radius) : radius(radius) {
 }
 
 void Circle::add(double angle, const std::string& text) {
@@ -17,19 +16,10 @@ void Circle::add(double angle, const std::string& text) {
     points.push_back({angle, text});
 }
 
-void Circle::clear() {
-    points.clear();
-}
-
 void Circle::draw() const {
     const int size = radius * 2 + 1;
     const int center = radius;
-
-    std::vector<std::string> output(
-        size,
-        std::string(size, EMPTY_SYMBOL)
-    );
-
+    std::vector output(size,std::string(size, EMPTY_SYMBOL));
     output[center][center] = CENTER_SYMBOL;
 
     for (const auto& point : points) {
@@ -37,34 +27,24 @@ void Circle::draw() const {
 
         const int x = static_cast<int>(
             std::round(
-                center + radius * std::cos(rad)
+                center + radius * std::sin(rad)
             )
         );
 
-        const int y = static_cast<int>(
-            std::round(
-                center - radius * std::sin(rad) * TERMINAL_Y_SCALE
-            )
-        );
-
-        int startX =x - static_cast<int>(point.text.length()) / 2;
-
+        const int y = static_cast<int>(std::round(center - radius * std::cos(rad) * TERMINAL_Y_SCALE));
+        int startX = x - static_cast<int>(point.text.length()) / 2;
         startX = std::max(0, startX);
-
-        if (startX + point.text.length() >= size)
-            startX = size - point.text.length() - 1;
+        const int maxStart = size - static_cast<int>(point.text.length());
+        startX = std::min(startX, maxStart);
 
         if (y < 0 || y >= size)
             continue;
 
-        for (int i = 0; i < point.text.length(); ++i) {
+        for (int i = 0; i < static_cast<int>(point.text.length()); ++i) {
             const int xPos = startX + i;
-
-            if (xPos >= 0 && xPos < size)
-                output[y][xPos] = point.text[i];
+            if (xPos >= 0 && xPos < size)output[y][xPos] = point.text[i];
         }
     }
 
-    for (const auto& line : output)
-        std::cout << line << '\n';
+    for (const auto& line : output) std::cout << line << '\n';
 }
