@@ -16,11 +16,16 @@ public:
     City central_city;
     std::vector<City> other_cities;
     std::vector<double> angles;
-    int tries = 1;
+    int tries = 0;
 
     Game(City& central_city, std::vector<City>& other_cities);
 
+    void Start();
+
     void Start() const;
+
+private:
+    bool ask_for_city(const string& city_name) const;
 };
 
 #endif //CITYANGLE_GAME_H
