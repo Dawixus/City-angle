@@ -18,7 +18,7 @@ public:
     std::vector<double> angles;
     int tries = 0;
 
-    Game(City& central_city, std::vector<City>& other_cities);
+    Game(City central_city, std::vector<City> other_cities);
 
     void Start();
 
