@@ -1,79 +1,32 @@
-#include <SDL2/SDL.h>
 #include <iostream>
+#include <string>
 
-class Game {
-public:
-    bool init() {
-        if (SDL_Init(SDL_INIT_VIDEO) != 0)
-            return false;
-
-        window = SDL_CreateWindow(
-            "Moje hra",
-            SDL_WINDOWPOS_CENTERED,
-            SDL_WINDOWPOS_CENTERED,
-            800, 600,
-            SDL_WINDOW_SHOWN
-        );
-
-        if (!window)
-            return false;
-
-        renderer = SDL_CreateRenderer(
-            window, -1, SDL_RENDERER_ACCELERATED
-        );
-
-        return renderer != nullptr;
-    }
-
-    void run() {
-        bool running = true;
-        SDL_Event event;
-
-        while (running) {
-            while (SDL_PollEvent(&event)) {
-                if (event.type == SDL_QUIT)
-                    running = false;
-            }
-
-            update();
-            render();
-        }
-    }
-
-    void cleanup() {
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-    }
-
-private:
-    SDL_Window* window = nullptr;
-    SDL_Renderer* renderer = nullptr;
-
-    void update() {
-        // herní logika
-    }
-
-    void render() {
-        SDL_SetRenderDrawColor(renderer, 20, 20, 30, 255);
-        SDL_RenderClear(renderer);
-
-        // vykreslování hry
-
-        SDL_RenderPresent(renderer);
-    }
-};
+#include "Circle.h"
+#include "City.h"
+#include "Date.h"
+#include "FileReader.h"
+#include "Random.h"
+#include "Game.h"
 
 int main() {
-    Game game;
+    const std::string FILE_NAME = "cities.json";
+    const std::vector<City> cities = FileReader::read(FILE_NAME);
 
-    if (!game.init()) {
-        std::cerr << "Nepodarilo se inicializovat hru.\n";
-        return 1;
+    tuple<int,int,int> date = Date::getDay();
+    Random random(std::get<0>(date) + 100 * std::get<1>(date) + 10000 * std::get<2>(date));
+    std::vector<City> chosen_cities;
+
+    for (int i = 0; i < 5; i++) {
+        int k = random.range(0, cities.size() - 1);
+        chosen_cities.push_back(cities[k]);
     }
 
-    game.run();
-    game.cleanup();
+    City chosen_city = cities[random.range(0, cities.size() - 1)];
+    cout << chosen_city.name << endl;
+
+    Game game(chosen_city,chosen_cities);
+
+    game.Start();
 
     return 0;
 }
